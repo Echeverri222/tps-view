@@ -4,18 +4,18 @@
 
 ![TPS View](docs/screenshot.jpg)
 
-An open-source, modern landmark digitizer for **`.tps` files**: a replacement for tpsDig2 that runs natively on **macOS**, as well as Windows and Linux.
+A free, open-source app that makes working with **`.tps` landmark files** easy. Open your images, place landmarks, set the scale, and save an analysis-ready dataset. Runs natively on **macOS**, Windows and Linux.
 
-Files saved by TPS View stay compatible with tpsDig2, tpsUtil, tpsRelw, MorphoJ and R (`geomorph::readland.tps`).
+TPS View reads and writes the standard TPS format, so existing files open as they are and saved files work in MorphoJ, PAST and R (`geomorph::readland.tps`).
 
 ## Features (v0.1)
 
 - **Open and save `.tps` files.** Supports `LM`, `LM3`, `CURVES`, `OUTLINES`, `VARIABLES`, `IMAGE`, `ID`, `SCALE`, `COMMENT`, and unknown keywords, which are kept as-is.
   - Tolerant of messy files: Windows line endings, lowercase keywords, decimal commas, truncated blocks.
 - **Choose each specimen's image.** Pick the exact image file for any specimen.
-  - Windows paths such as `C:\data\fish_01.JPG` are found automatically next to the `.tps` file.
+  - Windows paths such as `C:\data\wing_01.png` are found automatically next to the `.tps` file.
   - Missing images can be relinked in bulk from a folder.
-- **New from images.** Create a TPS file from a set of images (like tpsUtil's *Build tps from images*), or add images to an existing file.
+- **New from images.** Create a TPS file from a set of images, or add images to an existing file.
 - **Digitize landmarks.**
   - Click to place, drag to move, and delete.
   - Mark landmarks as missing (`-1 -1`).
@@ -73,10 +73,10 @@ xattr -cr "/Applications/TPS View.app"
 
 ## Notes on the TPS format
 
-- **Coordinates are in pixels, with the origin at the bottom-left of the image** (tpsDig convention). TPS View converts between this and screen coordinates, so files open with points in the same place as in tpsDig.
+- **Coordinates are whole pixels, with the origin at the bottom-left of the image**, as the TPS format specifies. TPS View converts between this and screen coordinates, so points from existing files appear exactly where they were placed.
 - **`SCALE` is in units per pixel.** The unit itself (mm, µm…) isn't stored in the file; the unit picker in TPS View only affects what's shown on screen.
 - **Missing landmarks** are written as negative coordinates (`-1.00000 -1.00000`). Use `readland.tps(..., negNA = TRUE)` in geomorph.
-- **New `IMAGE=` values are written relative to the `.tps` file** (for example `fish_01.jpg` or `images/fish_01.jpg`), so a dataset folder can be moved between computers.
+- **New `IMAGE=` values are written relative to the `.tps` file** (for example `wing_01.png` or `images/wing_01.png`), so a dataset folder can be moved between computers.
 
 ## Development
 
@@ -89,7 +89,7 @@ npm test           # unit tests for the TPS parser/writer
 npm run build      # build installers into app/src-tauri/target/release/bundle/
 ```
 
-**Browser preview:** while `npm run dev` is running, you can also open http://localhost:1420 in a normal browser. A fake backend (`app/src/devmock.ts`) opens `examples/fish/fish.tps` and keeps saves in memory, which is handy for UI work and automated testing.
+**Browser preview:** while `npm run dev` is running, you can also open http://localhost:1420 in a normal browser. A fake backend (`app/src/devmock.ts`) opens `examples/wing/anfaan01.tps` and keeps saves in memory, which is handy for UI work and automated testing.
 
 Project layout:
 
@@ -98,7 +98,7 @@ packages/tps-core/   TPS parser, writer and utilities (pure TypeScript, no UI), 
 app/                 Desktop app: React + TypeScript UI
 app/src-tauri/       Tauri (Rust) shell: file access, native menus, bundling
 fixtures/            Sample .tps files used by the tests
-examples/            Example dataset (synthetic fish photos + .tps)
+examples/            Example dataset: a 1200 dpi wing scan with 17 landmarks
 docs/                Website (GitHub Pages)
 ```
 
@@ -133,4 +133,4 @@ Contributions are welcome! Real-world `.tps` files that don't open correctly are
 
 ## License
 
-MIT. TPS View is an independent project and isn't affiliated with the tps series software by F. James Rohlf.
+MIT.

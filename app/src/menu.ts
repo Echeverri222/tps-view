@@ -20,7 +20,7 @@ export async function setupMenu() {
         await Submenu.new({
           text: "TPS View",
           items: [
-            await PredefinedMenuItem.new({ item: { About: { name: "TPS View", version: "0.1.0", license: "MIT", website: "https://echeverri222.github.io/tps-view/", websiteLabel: "echeverri222.github.io/tps-view" } } }),
+            await PredefinedMenuItem.new({ item: { About: { name: "TPS View", version: "0.1.1", license: "MIT", website: "https://echeverri222.github.io/tps-view/", websiteLabel: "echeverri222.github.io/tps-view" } } }),
             await sep(),
             await PredefinedMenuItem.new({ item: "Services" }),
             await sep(),

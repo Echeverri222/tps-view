@@ -1,16 +1,16 @@
 /**
  * Development-only fake of the Tauri backend so the UI can run in an ordinary browser
  * (handy for UI work and automated testing). Loaded from main.tsx only when running under
- * `vite` without Tauri. Opens examples/fish/fish.tps on start; "saves" are kept in memory.
+ * `vite` without Tauri. Opens examples/wing/anfaan01.tps on start; "saves" are kept in memory.
  */
 import { mockIPC, mockWindows } from "@tauri-apps/api/mocks";
 
 declare const __REPO_ROOT__: string;
 const root = __REPO_ROOT__;
-const demoDir = `${root}/examples/fish`;
+const demoDir = `${root}/examples/wing`;
 const saved: Record<string, string> = {};
 (window as unknown as { __saved: typeof saved }).__saved = saved;
-let pending = [`${demoDir}/fish.tps`];
+let pending = [`${demoDir}/anfaan01.tps`];
 
 const file = (p: string) => fetch(`/@fs${p}`).then((r) => {
   if (!r.ok) throw new Error(`${p}: not found`);
@@ -42,8 +42,8 @@ mockIPC(
       }
       case "plugin:dialog|open":
         if (a.options?.directory) return demoDir;
-        if (a.options?.multiple) return ["fish_001.jpg", "fish_002.jpg", "fish_003.jpg"].map((f) => `${demoDir}/${f}`);
-        return a.options?.filters?.[0]?.name === "Images" ? `${demoDir}/fish_002.jpg` : `${demoDir}/fish.tps`;
+        if (a.options?.multiple) return [`${demoDir}/anfaan01.png`];
+        return a.options?.filters?.[0]?.name === "Images" ? `${demoDir}/anfaan01.png` : `${demoDir}/anfaan01.tps`;
       case "plugin:dialog|save":
         return `${demoDir}/saved.tps`;
       case "plugin:dialog|ask":

@@ -1,7 +1,7 @@
 {
   "name": "@tps-view/core",
   "version": "0.1.0",
-  "description": "Reader/writer and utilities for the TPS morphometrics file format (tpsDig compatible).",
+  "description": "Reader/writer and utilities for the TPS morphometrics file format (geometric morphometrics landmarks).",
   "license": "MIT",
   "type": "module",
   "main": "src/index.ts",

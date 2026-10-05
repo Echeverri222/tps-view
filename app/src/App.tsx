@@ -170,7 +170,7 @@ function Welcome() {
             </svg>
           </div>
           <h1>TPS View</h1>
-          <p className="muted">Open-source landmark digitizer, compatible with tpsDig .tps files.</p>
+          <p className="muted">Create and edit .tps landmark files: open images, place landmarks, set the scale.</p>
           <div className="row center">
             <button className="primary big" onClick={openDialog}>
               Open TPS file…
