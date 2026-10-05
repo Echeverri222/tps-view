@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>TPS View</title>
+    <meta name="description" content="Free, open-source landmark digitizer for .tps files. A modern tpsDig2 alternative for macOS, Windows and Linux." />
+    <link rel="icon" type="image/png" href="icon.png" />
+    <meta property="og:title" content="TPS View — open-source landmark digitizer" />
+    <meta property="og:description" content="A modern, free tpsDig2 alternative for macOS, Windows and Linux. Reads and writes standard .tps files." />
+    <meta property="og:image" content="screenshot.jpg" />
+    <style>
+      :root {
+        --bg: #ffffff;
+        --bg-2: #f5f5f7;
+        --text: #1d1d1f;
+        --muted: #6e6e73;
+        --border: #e3e3e8;
+        --accent: #0a7aff;
+        --accent-2: #0060df;
+        --card: #ffffff;
+        --code: #f0f0f3;
+        color-scheme: light dark;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #0f0f11;
+          --bg-2: #18181b;
+          --text: #f5f5f7;
+          --muted: #a1a1a6;
+          --border: #2c2c30;
+          --accent: #3a9bff;
+          --accent-2: #0a7aff;
+          --card: #1c1c1f;
+          --code: #26262a;
+        }
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+        line-height: 1.55;
+        -webkit-font-smoothing: antialiased;
+      }
+      a {
+        color: var(--accent);
+        text-decoration: none;
+      }
+      a:hover {
+        text-decoration: underline;
+      }
+      .wrap {
+        max-width: 1080px;
+        margin: 0 auto;
+        padding: 0 20px;
+      }
+      nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 18px 0;
+      }
+      nav .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 600;
+        color: var(--text);
+      }
+      nav .brand img {
+        width: 30px;
+        height: 30px;
+      }
+      nav .links {
+        display: flex;
+        gap: 20px;
+        font-size: 15px;
+      }
+      nav .links a {
+        color: var(--muted);
+      }
+
+      .hero {
+        text-align: center;
+        padding: 56px 0 40px;
+      }
+      .hero img.logo {
+        width: 96px;
+        height: 96px;
+      }
+      h1 {
+        font-size: clamp(36px, 6vw, 56px);
+        line-height: 1.08;
+        letter-spacing: -0.02em;
+        margin: 16px 0 12px;
+      }
+      .tagline {
+        font-size: clamp(18px, 2.4vw, 22px);
+        color: var(--muted);
+        max-width: 660px;
+        margin: 0 auto 30px;
+      }
+      .buttons {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 22px;
+        border-radius: 980px;
+        font-size: 16px;
+        font-weight: 500;
+        border: 1px solid var(--border);
+        color: var(--text);
+        background: var(--card);
+      }
+      .btn:hover {
+        text-decoration: none;
+        border-color: var(--muted);
+      }
+      .btn.primary {
+        background: var(--accent-2);
+        border-color: var(--accent-2);
+        color: #fff;
+      }
+      .btn.primary:hover {
+        background: var(--accent);
+      }
+      .meta {
+        margin-top: 14px;
+        font-size: 14px;
+        color: var(--muted);
+      }
+      .meta a {
+        color: var(--muted);
+        text-decoration: underline;
+      }
+
+      .shot {
+        margin: 28px auto 0;
+        border-radius: 14px;
+        overflow: hidden;
+        border: 1px solid var(--border);
+        box-shadow: 0 30px 80px rgba(0, 0, 0, 0.18);
+      }
+      .shot img {
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+
+      section {
+        padding: 72px 0;
+      }
+      section.alt {
+        background: var(--bg-2);
+      }
+      h2 {
+        font-size: clamp(26px, 3.6vw, 36px);
+        letter-spacing: -0.01em;
+        margin: 0 0 10px;
+        text-align: center;
+      }
+      .lead {
+        text-align: center;
+        color: var(--muted);
+        max-width: 640px;
+        margin: 0 auto 40px;
+        font-size: 17px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 16px;
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 22px;
+      }
+      .card .icon {
+        font-size: 26px;
+        line-height: 1;
+      }
+      .card h3 {
+        margin: 12px 0 6px;
+        font-size: 17px;
+      }
+      .card p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 15px;
+      }
+
+      .steps {
+        max-width: 680px;
+        margin: 0 auto;
+        padding-left: 22px;
+        font-size: 16px;
+      }
+      .steps li {
+        margin-bottom: 10px;
+      }
+      code {
+        font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+        font-size: 0.9em;
+        background: var(--code);
+        padding: 2px 6px;
+        border-radius: 5px;
+      }
+      pre {
+        background: var(--code);
+        border-radius: 10px;
+        padding: 14px 16px;
+        overflow-x: auto;
+        font-size: 14px;
+        max-width: 680px;
+        margin: 10px auto 0;
+      }
+      pre code {
+        background: none;
+        padding: 0;
+      }
+      .note {
+        max-width: 680px;
+        margin: 16px auto 0;
+        color: var(--muted);
+        font-size: 15px;
+      }
+
+      .compat {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 8px;
+      }
+      .pill {
+        border: 1px solid var(--border);
+        border-radius: 980px;
+        padding: 6px 14px;
+        font-size: 14px;
+        background: var(--card);
+      }
+
+      footer {
+        border-top: 1px solid var(--border);
+        padding: 28px 0 40px;
+        color: var(--muted);
+        font-size: 14px;
+        text-align: center;
+      }
+
+      @media (max-width: 600px) {
+        nav .links a.hide-sm {
+          display: none;
+        }
+        section {
+          padding: 52px 0;
+        }
+        .btn {
+          width: 100%;
+          justify-content: center;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <nav>
+        <a class="brand" href="./"><img src="icon.png" alt="" /> TPS View</a>
+        <div class="links">
+          <a href="#features" class="hide-sm">Features</a>
+          <a href="#install" class="hide-sm">Install</a>
+          <a href="https://github.com/Echeverri222/tps-view">GitHub</a>
+        </div>
+      </nav>
+
+      <header class="hero">
+        <img class="logo" src="icon.png" alt="TPS View icon" />
+        <h1>Digitize landmarks.<br />On any computer.</h1>
+        <p class="tagline">
+          TPS View is a free, open-source landmark digitizer for geometric morphometrics. It's a modern alternative to tpsDig2 that runs natively on Mac and reads and writes standard <code>.tps</code> files.
+        </p>
+        <div class="buttons">
+          <a class="btn primary" id="download-mac" href="https://github.com/Echeverri222/tps-view/releases/latest">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 16l-5-5h3V4h4v7h3l-5 5zm-7 2h14v2H5v-2z" /></svg>
+            Download for macOS
+          </a>
+          <a class="btn" href="https://github.com/Echeverri222/tps-view/releases/latest">Windows &amp; Linux</a>
+          <a class="btn" href="https://github.com/Echeverri222/tps-view">View source</a>
+        </div>
+        <div class="meta" id="meta">Free and open source (MIT) · Apple Silicon &amp; Intel · macOS 11+</div>
+        <div class="shot">
+          <img src="screenshot.jpg" alt="TPS View showing a fish specimen with three landmarks, the specimen list and the scale panel" width="1491" height="812" />
+        </div>
+      </header>
+    </div>
+
+    <section class="alt" id="features">
+      <div class="wrap">
+        <h2>Everything you used tpsDig for</h2>
+        <p class="lead">Plus the small things that make digitizing hundreds of specimens faster.</p>
+        <div class="grid">
+          <div class="card">
+            <div class="icon">📍</div>
+            <h3>Landmarks</h3>
+            <p>Click to place, drag to adjust, and mark landmarks as missing. Undo works without limit, and a magnifier helps you place points precisely.</p>
+          </div>
+          <div class="card">
+            <div class="icon">📏</div>
+            <h3>Scale tool &amp; scale table</h3>
+            <p>Click both ends of a ruler to set SCALE. Every specimen's scale is listed in one table, where you can edit values or apply them in bulk.</p>
+          </div>
+          <div class="card">
+            <div class="icon">🖼️</div>
+            <h3>Choose the exact image</h3>
+            <p>Pick which image belongs to each specimen. Windows paths like <code>C:\…\img.jpg</code> are found automatically, and missing images can be relinked from a folder.</p>
+          </div>
+          <div class="card">
+            <div class="icon">🗂️</div>
+            <h3>Build from images</h3>
+            <p>Start a new TPS file from a folder of photos, or drop more images onto the window to add specimens.</p>
+          </div>
+          <div class="card">
+            <div class="icon">✅</div>
+            <h3>Dataset check</h3>
+            <p>Flags inconsistent landmark counts, missing scales or images, and duplicate IDs before you run your analysis.</p>
+          </div>
+          <div class="card">
+            <div class="icon">📤</div>
+            <h3>CSV export</h3>
+            <p>Export coordinates in pixels or real units (scaled by SCALE), ready for R, Python or Excel.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <h2>Your files stay standard</h2>
+        <p class="lead">
+          TPS View writes the same format as tpsDig2: whole-pixel coordinates measured from the bottom-left corner, and <code>SCALE</code> in units per pixel. Your datasets keep working with:
+        </p>
+        <div class="compat">
+          <span class="pill">tpsDig2</span>
+          <span class="pill">tpsUtil</span>
+          <span class="pill">tpsRelw</span>
+          <span class="pill">MorphoJ</span>
+          <span class="pill">geomorph (R)</span>
+          <span class="pill">Morpho (R)</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="alt" id="install">
+      <div class="wrap">
+        <h2>Install on macOS</h2>
+        <p class="lead">TPS View is free, so it isn't signed with a paid Apple certificate. macOS asks you to approve it once.</p>
+        <ol class="steps">
+          <li>Download the <code>.dmg</code>, open it and drag <strong>TPS View</strong> to <strong>Applications</strong>.</li>
+          <li>Open TPS View. When macOS warns it can't verify the developer, click <strong>Done</strong>.</li>
+          <li>Open <strong>System Settings → Privacy &amp; Security</strong>, scroll down and click <strong>Open Anyway</strong>.</li>
+        </ol>
+        <p class="note">If macOS says the app “is damaged”, run this once in Terminal:</p>
+        <pre><code>xattr -cr "/Applications/TPS View.app"</code></pre>
+      </div>
+    </section>
+
+    <footer>
+      <div class="wrap">
+        TPS View is MIT-licensed and built in the open: <a href="https://github.com/Echeverri222/tps-view">source</a> ·
+        <a href="https://github.com/Echeverri222/tps-view/issues">report a problem</a> ·
+        <a href="https://github.com/Echeverri222/tps-view/releases">all releases</a><br />
+        Independent project, not affiliated with the tps series by F. James Rohlf.
+      </div>
+    </footer>
+
+    <script>
+      // Point the download button straight at the latest .dmg when GitHub's API is reachable;
+      // otherwise it keeps linking to the releases page.
+      fetch("https://api.github.com/repos/Echeverri222/tps-view/releases/latest")
+        .then((r) => (r.ok ? r.json() : Promise.reject()))
+        .then((rel) => {
+          const dmg = (rel.assets || []).find((a) => /\.dmg$/i.test(a.name));
+          if (dmg) document.getElementById("download-mac").href = dmg.browser_download_url;
+          if (rel.tag_name) {
+            const meta = document.getElementById("meta");
+            meta.textContent = `Version ${rel.tag_name.replace(/^v/, "")} · ` + meta.textContent;
+          }
+        })
+        .catch(() => {});
+    </script>
+  </body>
+</html>

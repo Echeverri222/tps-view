@@ -1,0 +1,14 @@
+{
+  "name": "tps-view-monorepo",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "app"
+  ],
+  "scripts": {
+    "dev": "npm --workspace app run tauri dev",
+    "build": "npm --workspace app run tauri build",
+    "test": "npm --workspace @tps-view/core run test",
+    "typecheck": "npm --workspaces --if-present run typecheck"
+  }
+}
