@@ -73,6 +73,7 @@ export async function setupMenu() {
       await item("Actual Pixels", () => st().requestView("actual"), "CmdOrCtrl+1"),
       await sep(),
       await item("Toggle Magnifier", () => st().set({ magnifier: !st().magnifier })),
+      await item("Toggle Landmark Numbers", () => st().toggleLabels()),
       await item("Scale Table…", () => st().set({ modal: "scales" }), "CmdOrCtrl+T"),
       await item("Check Dataset…", () => st().set({ modal: "issues" }), "CmdOrCtrl+Shift+K"),
     ],

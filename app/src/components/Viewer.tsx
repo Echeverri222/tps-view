@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { isMissing, roundCoord, type Point } from "@tps-view/core";
 import { chooseImageForCurrent, relinkMissingImages } from "../actions";
 import { loadImage } from "../images";
+import { isTextEntry } from "../keys";
 import { currentSpecimen, useStore } from "../store";
 import { ScalePopover } from "./ScalePopover";
 
@@ -19,7 +20,6 @@ type Drag =
 const HIT_RADIUS = 9;
 const LOUPE_SIZE = 180;
 const COLORS = {
-  lm: "#ff453a",
   lmSelected: "#ffd60a",
   curve: "#40c8ff",
   outline: "#30d158",
@@ -96,24 +96,34 @@ export function Viewer() {
       ctx.lineWidth = 1.5;
       for (const c of s.curves) polyline(ctx, c.points.map(map), COLORS.curve, false);
       for (const o of s.outlines) polyline(ctx, o.points.map(map), COLORS.outline, true);
+      const mk = st.marks;
       s.landmarks.forEach((p, k) => {
         if (isMissing(p)) return;
         const q = map(p);
         const sel = k === st.selectedLm;
+        const r = sel ? mk.size + Math.max(1.5, mk.size * 0.4) : mk.size;
         ctx.beginPath();
-        ctx.arc(q.x, q.y, sel ? 6 : 4.5, 0, Math.PI * 2);
-        ctx.fillStyle = sel ? COLORS.lmSelected : COLORS.lm;
+        ctx.arc(q.x, q.y, r, 0, Math.PI * 2);
+        ctx.fillStyle = sel ? COLORS.lmSelected : mk.color;
         ctx.fill();
-        ctx.strokeStyle = "white";
-        ctx.lineWidth = 1.5;
-        ctx.stroke();
-        if (labels) {
-          ctx.font = "600 12px -apple-system, system-ui, sans-serif";
-          ctx.lineWidth = 3;
-          ctx.strokeStyle = "rgba(0,0,0,0.75)";
-          ctx.strokeText(String(k + 1), q.x + 8, q.y - 8);
+        if (mk.ring || sel) {
+          ctx.strokeStyle = sel && !mk.ring ? "rgba(0,0,0,0.6)" : "white";
+          ctx.lineWidth = Math.min(1.5, Math.max(0.75, r * 0.3));
+          ctx.stroke();
+        }
+        // Without numbers, still label the selected landmark so you know which one you're moving.
+        if (labels && (mk.labels || sel)) {
+          const off = r + 2;
+          ctx.save();
+          ctx.font = `600 ${mk.labelSize}px -apple-system, system-ui, sans-serif`;
+          ctx.textBaseline = "alphabetic";
+          ctx.lineJoin = "round";
+          ctx.lineWidth = Math.max(2, mk.labelSize / 4);
+          ctx.strokeStyle = "rgba(0,0,0,0.65)";
+          ctx.strokeText(String(k + 1), q.x + off, q.y - off);
           ctx.fillStyle = sel ? COLORS.lmSelected : "white";
-          ctx.fillText(String(k + 1), q.x + 8, q.y - 8);
+          ctx.fillText(String(k + 1), q.x + off, q.y - off);
+          ctx.restore();
         }
       });
       if (st.tool === "scale" && st.scaleRef.length > 0) {
@@ -284,9 +294,8 @@ export function Viewer() {
 
   // Space bar = temporary pan.
   useEffect(() => {
-    const isTyping = (e: KeyboardEvent) => e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement || e.target instanceof HTMLSelectElement;
     const down = (e: KeyboardEvent) => {
-      if (e.code === "Space" && !isTyping(e)) {
+      if (e.code === "Space" && !isTextEntry(e.target)) {
         space.current = true;
         e.preventDefault();
       }
@@ -312,7 +321,8 @@ export function Viewer() {
     const s = currentSpecimen(useStore.getState());
     if (!s) return null;
     let best: number | null = null;
-    let bestD = HIT_RADIUS;
+    // Grab anywhere on a visible dot, but never pad beyond it, so new points can go close to existing ones.
+    let bestD = Math.max(HIT_RADIUS, useStore.getState().marks.size);
     s.landmarks.forEach((p, k) => {
       if (isMissing(p)) return;
       const q = toScreen(p);

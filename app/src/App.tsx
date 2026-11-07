@@ -10,6 +10,7 @@ import { IssuesPanel, ScaleTable } from "./components/Modals";
 import { SpecimenList } from "./components/SpecimenList";
 import { StatusBar, Toolbar } from "./components/Chrome";
 import { Viewer } from "./components/Viewer";
+import { isTextEntry } from "./keys";
 import { setupMenu } from "./menu";
 import { useStore } from "./store";
 
@@ -70,8 +71,7 @@ export function App() {
   // Single-key shortcuts (ignored while typing in a field).
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      const t = e.target;
-      if (t instanceof HTMLInputElement || t instanceof HTMLTextAreaElement || t instanceof HTMLSelectElement) return;
+      if (isTextEntry(e.target)) return;
       if (e.metaKey || e.ctrlKey || e.altKey) return;
       const st = useStore.getState();
       if (!st.file) return;
@@ -105,6 +105,10 @@ export function App() {
         case "m":
         case "M":
           st.set({ magnifier: !st.magnifier });
+          break;
+        case "n":
+        case "N":
+          st.toggleLabels();
           break;
         case "f":
         case "F":
