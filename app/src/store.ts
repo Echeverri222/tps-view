@@ -16,6 +16,46 @@ export interface Adjustments {
   invert: boolean;
 }
 
+/** How landmarks are drawn on the image. Display-only; never written to the TPS file. */
+export interface MarkStyle {
+  /** Dot radius in screen pixels. */
+  size: number;
+  /** Show landmark numbers next to every dot (the selected one is always labelled). */
+  labels: boolean;
+  /** Label font size in screen pixels. */
+  labelSize: number;
+  /** White ring around each dot. Off gives plain tpsDig-style dots. */
+  ring: boolean;
+  color: string;
+}
+
+export const DEFAULT_MARKS: MarkStyle = { size: 3, labels: true, labelSize: 11, ring: false, color: "#ff3b30" };
+export const MARK_SIZE_RANGE = [1, 10] as const;
+export const LABEL_SIZE_RANGE = [7, 24] as const;
+
+const clampNum = (v: unknown, [lo, hi]: readonly [number, number], fallback: number) =>
+  typeof v === "number" && Number.isFinite(v) ? Math.min(hi, Math.max(lo, v)) : fallback;
+
+/** Coerce a possibly stale or corrupt stored value into a drawable MarkStyle. */
+function sanitizeMarks(raw: unknown): MarkStyle {
+  const m = (raw && typeof raw === "object" ? raw : {}) as Record<string, unknown>;
+  const d = DEFAULT_MARKS;
+  return {
+    size: clampNum(m.size, MARK_SIZE_RANGE, d.size),
+    labels: typeof m.labels === "boolean" ? m.labels : d.labels,
+    labelSize: clampNum(m.labelSize, LABEL_SIZE_RANGE, d.labelSize),
+    ring: typeof m.ring === "boolean" ? m.ring : d.ring,
+    color: typeof m.color === "string" && /^#[0-9a-f]{6}$/i.test(m.color) ? m.color : d.color,
+  };
+}
+
+let marksSaveTimer: ReturnType<typeof setTimeout> | undefined;
+/** Sliders and the color picker fire many events per second; persist once they settle. */
+function saveMarksSoon(marks: MarkStyle) {
+  clearTimeout(marksSaveTimer);
+  marksSaveTimer = setTimeout(() => savePref("marks", marks), 300);
+}
+
 const HISTORY_LIMIT = 300;
 
 function loadPref<T>(key: string, fallback: T): T {
@@ -54,6 +94,7 @@ interface State {
   magnifier: boolean;
   unit: string;
   adjust: Adjustments;
+  marks: MarkStyle;
   modal: Modal;
   /** Bumped to ask the canvas to fit/zoom; value is the requested action. */
   viewRequest: { kind: "fit" | "actual" | "in" | "out"; n: number };
@@ -82,6 +123,9 @@ interface State {
   setImageInfo(field: string, info: ImageInfo): void;
 
   set(patch: Partial<Pick<State, "scaleRef" | "cursor" | "zoom" | "magnifier" | "unit" | "adjust" | "modal">>): void;
+  /** Merge a change into the landmark display style (pass DEFAULT_MARKS to reset). */
+  setMarks(patch: Partial<MarkStyle>): void;
+  toggleLabels(): void;
   requestView(kind: State["viewRequest"]["kind"]): void;
 }
 
@@ -107,6 +151,7 @@ export const useStore = create<State>((set, get) => ({
   magnifier: loadPref("magnifier", true),
   unit: loadPref("unit", "mm"),
   adjust: { brightness: 100, contrast: 100, invert: false },
+  marks: sanitizeMarks(loadPref<unknown>("marks", {})),
   modal: null,
   viewRequest: { kind: "fit", n: 0 },
 
@@ -255,6 +300,16 @@ export const useStore = create<State>((set, get) => ({
     if (patch.magnifier !== undefined) savePref("magnifier", patch.magnifier);
     if (patch.unit !== undefined) savePref("unit", patch.unit);
     set(patch);
+  },
+
+  setMarks(patch) {
+    const marks = sanitizeMarks({ ...get().marks, ...patch });
+    saveMarksSoon(marks);
+    set({ marks });
+  },
+
+  toggleLabels() {
+    get().setMarks({ labels: !get().marks.labels });
   },
 
   requestView(kind) {

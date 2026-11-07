@@ -4,3 +4,4 @@ target/
 .DS_Store
 *.log
 app/src-tauri/gen/schemas/
+.claude/scheduled_tasks.lock

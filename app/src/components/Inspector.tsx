@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { isMissing, missingPoint } from "@tps-view/core";
 import { chooseImageForCurrent, deleteCurrentSpecimen, relinkMissingImages } from "../actions";
-import { addMissingLandmark, currentSpecimen, useStore } from "../store";
+import { addMissingLandmark, currentSpecimen, DEFAULT_MARKS, LABEL_SIZE_RANGE, MARK_SIZE_RANGE, useStore } from "../store";
 import { UNITS } from "./ScalePopover";
 
 /** Text input that commits on blur / Enter instead of on every keystroke (one undo step per edit). */
@@ -40,6 +40,7 @@ export function Inspector() {
   const selectedLm = useStore((st) => st.selectedLm);
   const unit = useStore((st) => st.unit);
   const adjust = useStore((st) => st.adjust);
+  const marks = useStore((st) => st.marks);
   const st = useStore.getState;
 
   if (!s) return <aside className="inspector" />;
@@ -166,6 +167,38 @@ export function Inspector() {
             {s.curves.length} curve(s), {s.outlines.length} outline(s) — shown on the image; editing coming in v0.2.
           </p>
         )}
+      </section>
+
+      <section>
+        <div className="row spread">
+          <h4>Landmark display</h4>
+          <button className="link" onClick={() => st().setMarks(DEFAULT_MARKS)}>
+            Reset
+          </button>
+        </div>
+        <label className="slider">
+          <span className="row spread">
+            Point size <span className="mono">{marks.size}px</span>
+          </span>
+          <input type="range" min={MARK_SIZE_RANGE[0]} max={MARK_SIZE_RANGE[1]} step={0.5} value={marks.size} onChange={(e) => st().setMarks({ size: +e.target.value })} />
+        </label>
+        <label className="slider">
+          <span className="row spread">
+            Number size <span className="mono">{marks.labelSize}px</span>
+          </span>
+          <input type="range" min={LABEL_SIZE_RANGE[0]} max={LABEL_SIZE_RANGE[1]} value={marks.labelSize} disabled={!marks.labels} onChange={(e) => st().setMarks({ labelSize: +e.target.value })} />
+        </label>
+        <div className="row spread">
+          <label className="row">
+            <input type="checkbox" checked={marks.labels} onChange={(e) => st().setMarks({ labels: e.target.checked })} /> Numbers <kbd>N</kbd>
+          </label>
+          <label className="row">
+            <input type="checkbox" checked={marks.ring} onChange={(e) => st().setMarks({ ring: e.target.checked })} /> Outline
+          </label>
+          <label className="row" title="Point color">
+            <input type="color" value={marks.color} onChange={(e) => st().setMarks({ color: e.target.value })} />
+          </label>
+        </div>
       </section>
 
       <section>
